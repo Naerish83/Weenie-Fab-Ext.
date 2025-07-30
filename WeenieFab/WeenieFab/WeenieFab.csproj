@@ -1,0 +1,146 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Version>0.9.9.92</Version>
+    <ApplicationIcon>WeenieFabAppIcon.ico</ApplicationIcon>
+    <AssemblyVersion>0.9.9.92</AssemblyVersion>
+    <FileVersion>0.9.9.92</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="libs\**" />
+    <EmbeddedResource Remove="libs\**" />
+    <None Remove="libs\**" />
+    <Page Remove="libs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="icon\weeniefactoryicon.ico" />
+    <None Remove="lp_icon.ico" />
+    <None Remove="StringMap\SpellName.txt" />
+    <None Remove="StringMap\WeenieClassName.txt" />
+    <None Remove="StringMap\WeenieName.txt" />
+    <None Remove="StyleCop.Cache" />
+    <None Remove="TypeLists\BodyParts.txt" />
+    <None Remove="TypeLists\BoolTypes.txt" />
+    <None Remove="TypeLists\DamageTypes.txt" />
+    <None Remove="TypeLists\DiDTypes.txt" />
+    <None Remove="TypeLists\FloatTypes.txt" />
+    <None Remove="TypeLists\HelpResources.txt" />
+    <None Remove="TypeLists\InstanceIDTypes.txt" />
+    <None Remove="TypeLists\Int32Types.txt" />
+    <None Remove="TypeLists\Int64Types.txt" />
+    <None Remove="TypeLists\PositionTypes.txt" />
+    <None Remove="TypeLists\SkillTypes.txt" />
+    <None Remove="TypeLists\SpellNames.txt" />
+    <None Remove="TypeLists\StringTypes.txt" />
+    <None Remove="TypeLists\WeenieTypes.txt" />
+    <None Remove="WeenieFabIcon.ico" />
+    <None Remove="weeniefactoryicon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="icon\weeniefactoryicon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="StringMap\SpellName.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="StringMap\WeenieClassName.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="StringMap\WeenieName.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TypeLists\BodyParts.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TypeLists\BoolTypes.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TypeLists\DamageTypes.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TypeLists\DiDTypes.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TypeLists\FloatTypes.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TypeLists\HelpResources.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TypeLists\InstanceIDTypes.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TypeLists\Int32Types.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TypeLists\Int64Types.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TypeLists\PositionTypes.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TypeLists\SkillTypes.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TypeLists\SpellNames.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TypeLists\StringTypes.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TypeLists\WeenieTypes.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MySqlConnector" Version="2.4.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Ookii.Dialogs.Wpf.NETCore" Version="2.2.1" />
+  </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\ACData\ACDataLib\ACDataLib.csproj" />
+        <ProjectReference Include="..\..\EmoteScript\EmoteScriptLib\EmoteScriptLib.csproj" />
+    </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="lp_icon.ico" />
+    <Resource Include="WeenieFabIcon.ico" />
+    <Resource Include="weeniefactoryicon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\WeenieFabUser.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>WeenieFabUser.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\WeenieFabUser.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>WeenieFabUser.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+</Project>

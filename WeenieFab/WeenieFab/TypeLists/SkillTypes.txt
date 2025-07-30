@@ -1,0 +1,55 @@
+0 *Undefined - DO NOT USE
+1 *Axe - FOR CLASSIC WEAPONS SERVERS ONLY
+2 *Bow - FOR CLASSIC WEAPONS SERVERS ONLY
+3 *Crossbow - FOR CLASSIC WEAPONS SERVERS ONLY
+4 *Dagger - FOR CLASSIC WEAPONS SERVERS ONLY
+5 *Mace - FOR CLASSIC WEAPONS SERVERS ONLY
+6 MeleeDefense
+7 MissileDefense
+8 *Sling - DO NOT USE
+9 *Spear - FOR CLASSIC WEAPONS SERVERS ONLY
+10 *Staff - FOR CLASSIC WEAPONS SERVERS ONLY
+11 *Sword -FOR CLASSIC WEAPONS SERVERS ONLY
+12 *ThrownWeapon - FOR CLASSIC WEAPONS SERVERS ONLY
+13 *UnarmedCombat - FOR CLASSIC WEAPONS SERVERS ONLY
+14 ArcaneLore
+15 MagicDefense
+16 ManaConversion
+17 *Spellcraft - DO NOT USE
+18 ItemAppraisal
+19 PersonalAppraisal
+20 Deception
+21 Healing
+22 Jump
+23 Lockpick
+24 Run
+25 *Awareness - DO NOT USE
+26 *ArmsAndArmorRepair - DO NOT USE
+27 CreatureAppraisal
+28 WeaponAppraisal
+29 ArmorAppraisal
+30 MagicItemAppraisal
+31 CreatureEnchantment
+32 ItemEnchantment
+33 LifeMagic
+34 WarMagic
+35 Leadership
+36 Loyalty
+37 Fletching
+38 Alchemy
+39 Cooking
+40 Salvaging
+41 TwoHandedCombat
+42 *Gearcraft - DO NOT USE
+43 VoidMagic
+44 HeavyWeapons
+45 LightWeapons
+46 FinesseWeapons
+47 MissileWeapons
+48 Shield
+49 DualWield
+50 Recklessness
+51 SneakAttack
+52 DirtyFighting
+53 *Challenge - DO NOT USE
+54 Summoning

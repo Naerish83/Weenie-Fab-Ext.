@@ -1,0 +1,94 @@
+** To Finish Milestone 1 **
+*Priority*
+Add Generator Table
+
+*Issues
+
+
+* Polish *
+Code Cleanup/Organization
+
+*Optimize*
+Used Cloned Tables instead of creating new ones (Partially Done)
+
+* Misc *
+also along those lines, disallow adding more than 1 page with same id
+
+
+**Future Features** - After MileStone.
+Defaults for a new weenie (IE a quick wizard dialog??)
+**Have to wait for ACData to be fixed. Auto Convert Json Files
+**Rip Wants Merge wennies (good idea, just gotta figure out how to do it).
+MarkDown for ES in WeenieFab
+
+
+**Completed**
+#Done-Add Positions Table
+#Done-Found in Weenie 21383 Gaelan.sql The Last used is a double.  May just this a text field, because it really isn't use.
+#Done-Added Instance ID's (IID)
+#Done-NOT IMPLEMENTING Destination DropDown (Create Items) (to many variables)
+#Done-Add Error Log
+#Done-Auto generate file name on save
+#Done-Body Part Tab stops
+#Done-FileName Global
+#Done-Fixed Help Link to Weenie Repo
+#Done-Add Books Table
+#Done-Body Parts Table
+#Done-Auto Calculate Body Parts
+#Done-Added SQL to JSON converter.
+#Done-Added way for browsing folders. (used Ookii netCORE dialogs).
+#Done redo Read Sql?? (Basically the way I handle reading emotes)
+
+#Done-Added JSON Converter
+#Done-ToolTips
+#Done-Auto Calculate Skills
+
+#Done-Auto Calculate Health,Stamina,Mana
+#Done-UI design
+#Done-TabStops
+#Done-Add about page
+
+#Done-**Rip Suggestion, have it combine any existing ES files instead of reading emotes from .sql;
+
+#Done-Add Spell Search
+#Done-Add Spell Description
+#Done-Fix RichTextBox Tab
+#Done-Create Install Package (using Publish and just zipping the file).
+#Done-Add Attrib2 Write
+#Done-Add Skill Write
+#Done-Add ES convert to sql write
+#Done-Add CreateItemList Write
+#Done-Add String Write
+#Done-Add Spell Write
+#Done-Add Attribite Write
+#Done-Skills Dropdown List
+#Done-Add CreateItems (Trophy)
+#Done-Add Options Dialog (Mainly for paths right now)
+#Done-Add Specialized/Trained for Skills (SAC=3 for spec, SAC=2 for trained
+#Fixed Loading new file bug.
+#Done-Make attib/skill buttons work.
+#Done-Add Attributes and Skills tables
+#Done-Check save
+#Done-Look into why blank rows on open(tried several things, not sure how its happening, but not worrying right now, they don't export).
+#Done-Add DiD Types
+#Done-Add SpellID textbox
+#Done-Fix open file (for new files) Reset all the indexes for data grids.
+#Done-Add New file button
+#Done-Fix Width on Data Grid
+#Done-Cleanup unused files
+#Done-Figure out how to grab emotes from sql (are there different variations???)
+#Done-Add Emote Script converting from sql File
+#Not Happening, tried and failed Rename MainWindows
+#Change Icon
+#Tab Stops - fixed the basics
+
+**Future Features**
+Defaults for a new weenie (IE a quick wizard dialog)
+
+Auto Convert Json Files
+Auto Calculations for Skills/Health
+
+Body Parts Table
+Auto Calculate Body Parts
+
+MarkDown for ES in WeenieFab
