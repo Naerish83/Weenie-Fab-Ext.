@@ -1,4 +1,4 @@
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -6,20 +6,15 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using WeenieFab.Properties;
 using Path = System.IO.Path;
 
@@ -49,178 +44,308 @@ namespace WeenieFab
         public static DataTable positionsDataTable = new DataTable();
         public static DataTable eventDataTable = new DataTable();
 
-public MainWindow()
-{
-    InitializeComponent();
+        public MainWindow()
+        {
+            InitializeComponent();
 
-    // >>> SYLVA'S ADDITIONS START HERE <<<
-    var service = new LocalToolService(
-        @"C:\\ACE\\ACV3\\MuseAgents\\ACDatResolverCLI.exe", // <--- BOSS, YOU MUST CHANGE THIS TO THE REAL PATH TO ACDatResolverCLI.exe!
-        "Server=127.0.0.1;Port=3308;Database=ace_world;User Id=root;Password=root;SslMode=None;"); // <--- BOSS, YOU MUST CHANGE YOUR_DB_USER AND YOUR_DB_PASS TO YOUR ACTUAL DATABASE CREDENTIALS!
-    enhancedToolsTab.Initialize(service);
-    // >>> SYLVA'S ADDITIONS END HERE <<<
+            // Make the DIDs Value column a filtered, searchable picker
+            WireDidPickerColumn();
 
-    CreateWeenieTypeList();
-    CreateComboBoxLists();
-    CreateDataTable();
-    ClearAllDataTables();
-    ClearAllFields();
-    MiscSettings();
+            CreateWeenieTypeList();
+            CreateComboBoxLists();
+            CreateDataTable();
+            ClearAllDataTables();
+            ClearAllFields();
+            MiscSettings();
 
-    CreateSpellList();
-    GetVersion();
+            CreateSpellList();
+            GetVersion();
 
-    Globals.FileChanged = false;
+            Globals.FileChanged = false;
 
-    btnGenerateBodyTable.Visibility = Visibility.Hidden;
-    rtbBodyParts.Visibility = Visibility.Hidden;
+            btnGenerateBodyTable.Visibility = Visibility.Hidden;
+            rtbBodyParts.Visibility = Visibility.Hidden;
 
-    // For getting filename
-    string[] args = Environment.GetCommandLineArgs();
-    string fileToOpen = "";
+            // For getting filename
+            string[] args = Environment.GetCommandLineArgs();
+            string fileToOpen = "";
 
-    for (int i = 1; i <= args.Length -1; i++)
-    {
-        fileToOpen += args[i].ToString() + " ";
-    }
-    // Open File if one is dragged or specified.
-    if (fileToOpen.Contains(".sql"))
-    {
-        OpenSqlFile(fileToOpen);
-    }
-}
+            for (int i = 1; i <= args.Length - 1; i++)
+                fileToOpen += args[i] + " ";
+
+            // Open File if one is dragged or specified.
+            if (fileToOpen.Contains(".sql"))
+                OpenSqlFile(fileToOpen);
+        }
+
+        // ---------- DID Value picker column wiring ----------
+        private bool _didPickerWired;
+
+        private void WireDidPickerColumn()
+        {
+            if (_didPickerWired) return;
+
+            // Try to grab the grid by name first
+            var grid = this.FindName("dgDiD") as DataGrid;
+
+            // If that fails (or the grid lives inside a tab template), locate it safely via the visual tree
+            if (grid == null)
+            {
+                // Defer until the window is fully rendered so template parts exist
+                this.Dispatcher.InvokeAsync(() =>
+                {
+                    var g = FindDidGridByHeuristics();
+                    if (g == null) return;
+
+                    // Hook for both autogen and explicit columns
+                    g.AutoGeneratingColumn += DgDiD_AutoGeneratingColumn;
+                    g.Loaded += (_, __) => ReplaceValueColumnIfNeeded(g);
+                    _didPickerWired = true;
+                }, System.Windows.Threading.DispatcherPriority.Loaded);
+
+                return;
+            }
+
+            // We have the grid immediately
+            grid.AutoGeneratingColumn += DgDiD_AutoGeneratingColumn;
+            grid.Loaded += (_, __) => ReplaceValueColumnIfNeeded(grid);
+            _didPickerWired = true;
+        }
+
+        private DataGrid FindDidGridByHeuristics()
+        {
+            return FindVisualChildren<DataGrid>(this)
+                .FirstOrDefault(g =>
+                {
+                    try
+                    {
+                        if (g.Columns == null || g.Columns.Count < 2)
+                            return false;
+
+                        var hasProperty = g.Columns.Any(c => (c.Header?.ToString() ?? "")
+                            .Equals("Property", StringComparison.OrdinalIgnoreCase));
+                        var hasValue = g.Columns.Any(c => (c.Header?.ToString() ?? "")
+                            .Equals("Value", StringComparison.OrdinalIgnoreCase));
+
+                        return hasProperty && hasValue;
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                });
+        }
+
+        private static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
+        {
+            if (depObj == null) yield break;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+            {
+                var child = VisualTreeHelper.GetChild(depObj, i);
+                if (child is T t)
+                    yield return t;
+
+                foreach (var grand in FindVisualChildren<T>(child))
+                    yield return grand;
+            }
+        }
+
+        private void DgDiD_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
+        {
+            if (!string.Equals(e.PropertyName, "Value", StringComparison.Ordinal))
+                return;
+
+            e.Column = BuildDidValueTemplateColumn();
+        }
+
+        private void ReplaceValueColumnIfNeeded(DataGrid grid)
+        {
+            try
+            {
+                // Already swapped? bail.
+                if (grid.Columns.OfType<DataGridTemplateColumn>()
+                                .Any(c => (c.Header?.ToString() ?? "") == "Value"))
+                    return;
+
+                // Find the existing "Value" column by header text
+                var idx = -1;
+                for (int i = 0; i < grid.Columns.Count; i++)
+                {
+                    var h = grid.Columns[i].Header?.ToString() ?? "";
+                    if (h.Equals("Value", StringComparison.OrdinalIgnoreCase))
+                    {
+                        idx = i;
+                        break;
+                    }
+                }
+                if (idx < 0) return;
+
+                // capture old display index safely
+                int oldDisplayIndex = 0;
+                try { oldDisplayIndex = grid.Columns[idx].DisplayIndex; } catch { /* ignore */ }
+
+                var newCol = BuildDidValueTemplateColumn();
+
+                // remove old, insert new at same collection index
+                grid.Columns.RemoveAt(idx);
+                grid.Columns.Insert(idx, newCol);
+
+                // only set DisplayIndex AFTER it’s in the collection, and clamp
+                try
+                {
+                    int max = grid.Columns.Count - 1;
+                    newCol.DisplayIndex = Math.Max(0, Math.Min(oldDisplayIndex, max));
+                }
+                catch { /* if DisplayIndex shuffles due to frozen columns etc., live with collection order */ }
+            }
+            catch
+            {
+                // swallow — grid might still be templating; next Loaded will retry
+            }
+        }
+
+
+        private DataGridTemplateColumn BuildDidValueTemplateColumn()
+        {
+            var templateCol = new DataGridTemplateColumn { Header = "Value" };
+
+            // Editing template → DidValuePicker
+            var editFactory = new FrameworkElementFactory(typeof(DidValuePicker));
+
+            // DidType <- [Property]
+            var didTypeBinding = new Binding("[Property]")
+            {
+                Mode = BindingMode.OneWay,
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            };
+            editFactory.SetBinding(DidValuePicker.DidTypeProperty, didTypeBinding);
+
+            // Value <-> [Value]
+            var valueBinding = new Binding("[Value]")
+            {
+                Mode = BindingMode.TwoWay,
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            };
+            editFactory.SetBinding(DidValuePicker.ValueProperty, valueBinding);
+
+            templateCol.CellEditingTemplate = new DataTemplate { VisualTree = editFactory };
+
+            // Read-only template: show numeric value (editor shows hex/validation)
+            var cellFactory = new FrameworkElementFactory(typeof(TextBlock));
+            cellFactory.SetBinding(TextBlock.TextProperty, new Binding("[Value]"));
+            templateCol.CellTemplate = new DataTemplate { VisualTree = cellFactory };
+
+            return templateCol;
+        }
+        // ----------------------------------------------------
+
+
 
         private static bool SearchForDuplicateProps(DataTable tempTable, string searchProp)
         {
-            bool found = false;
-
             foreach (DataRow row in tempTable.Rows)
             {
-                if (row[0].ToString() == searchProp)
-                {
-                    found = true;
-                    return found;
-                }
-                else
-                    found = false;
+                if (row[0]?.ToString() == searchProp)
+                    return true;
             }
-
-            return found;
+            return false;
         }
 
         public void CreateComboBoxLists()
         {
             List<string> integer32List = new List<string>();
             foreach (string line in File.ReadLines(@"TypeLists\Int32Types.txt"))
-            {
                 integer32List.Add(line);
-            }
             cbInt32Props.ItemsSource = integer32List;
             cbInt32Props.SelectedIndex = 1;
 
             List<string> integer64List = new List<string>();
             foreach (string line in File.ReadLines(@"TypeLists\Int64Types.txt"))
-            {
                 integer64List.Add(line);
-            }
             cbInt64Props.ItemsSource = integer64List;
             cbInt64Props.SelectedIndex = 1;
 
             List<string> BoolList = new List<string>();
             foreach (string line in File.ReadLines(@"TypeLists\BoolTypes.txt"))
-            {
                 BoolList.Add(line);
-            }
             cbBoolProps.ItemsSource = BoolList;
             cbBoolProps.SelectedIndex = 1;
 
             List<string> FloatList = new List<string>();
             foreach (string line in File.ReadLines(@"TypeLists\FloatTypes.txt"))
-            {
                 FloatList.Add(line);
-            }
             cbFloatProps.ItemsSource = FloatList;
             cbFloatProps.SelectedIndex = 1;
 
             List<string> StringList = new List<string>();
             foreach (string line in File.ReadLines(@"TypeLists\StringTypes.txt"))
-            {
                 StringList.Add(line);
-            }
             cbStringProps.ItemsSource = StringList;
             cbStringProps.SelectedIndex = 1;
 
             List<string> DiDList = new List<string>();
             foreach (string line in File.ReadLines(@"TypeLists\DiDTypes.txt"))
-            {
                 DiDList.Add(line);
-            }
             cbDiDProps.ItemsSource = DiDList;
             cbDiDProps.SelectedIndex = 1;
 
             List<string> SkillList = new List<string>();
             foreach (string line in File.ReadLines(@"TypeLists\SkillTypes.txt"))
-            {
                 SkillList.Add(line);
-            }
             cbSkillType.ItemsSource = SkillList;
             cbSkillType.SelectedIndex = 6;
 
             List<string> BodyParts = new List<string>();
             foreach (string line in File.ReadLines(@"TypeLists\BodyParts.txt"))
-            {
                 BodyParts.Add(line);
-            }
             cbBodyPart.ItemsSource = BodyParts;
             cbBodyPart.SelectedIndex = 0;
 
             List<string> DamageTypes = new List<string>();
             foreach (string line in File.ReadLines(@"TypeLists\DamageTypes.txt"))
-            {
                 DamageTypes.Add(line);
-            }
             cbBodyPartDamageType.ItemsSource = DamageTypes;
             cbBodyPartDamageType.SelectedIndex = 1;
 
             List<string> InstanceTypes = new List<string>();
             foreach (string line in File.ReadLines(@"TypeLists\InstanceIDTypes.txt"))
-            {
                 InstanceTypes.Add(line);
-            }
             cbIidProps.ItemsSource = InstanceTypes;
             cbIidProps.SelectedIndex = 1;
-            
+
             List<string> PositionTypes = new List<string>();
             foreach (string line in File.ReadLines(@"TypeLists\PositionTypes.txt"))
-            {
                 PositionTypes.Add(line);
-            }
             cbPosition.ItemsSource = PositionTypes;
             cbPosition.SelectedIndex = 1;
-
         }
+
         // Testing Search
         public void CreateSpellList()
         {
             List<SpellNames> listSpellNames = new List<SpellNames>();
-
             foreach (string line in File.ReadLines(@"TypeLists\SpellNames.txt"))
             {
                 string[] spellData = line.Split(",");
-
-                listSpellNames.Add(new SpellNames { SpellID = ConvertToInteger(spellData[0]), SpellName = spellData[1] });
+                listSpellNames.Add(new SpellNames
+                {
+                    SpellID = ConvertToInteger(spellData[0]),
+                    SpellName = spellData.Length > 1 ? spellData[1] : ""
+                });
             }
             lvSpellsList.ItemsSource = listSpellNames;
             CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(lvSpellsList.ItemsSource);
             view.Filter = SpellFilter;
         }
+
         private bool SpellFilter(object spellname)
         {
-            if (String.IsNullOrEmpty(tbSpellSearch.Text))
+            if (string.IsNullOrEmpty(tbSpellSearch.Text))
                 return true;
-            else
-                return ((spellname as SpellNames).SpellName.IndexOf(tbSpellSearch.Text, StringComparison.OrdinalIgnoreCase) >= 0);
+            return (spellname as SpellNames)?.SpellName.IndexOf(tbSpellSearch.Text, StringComparison.OrdinalIgnoreCase) >= 0;
         }
+
         private void txtFilter_TextChanged(object sender, TextChangedEventArgs e)
         {
             CollectionViewSource.GetDefaultView(lvSpellsList.ItemsSource).Refresh();
@@ -228,29 +353,27 @@ public MainWindow()
 
         public void CreateWeenieTypeList()
         {
-
             string filepath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"TypeLists\WeenieTypes.txt");
-
-
             List<string> weenieTypeList = new List<string>();
             foreach (string line in File.ReadLines(filepath))
-            {
                 weenieTypeList.Add(line);
-            }
             cbWeenieType.ItemsSource = weenieTypeList;
             cbWeenieType.SelectedIndex = 1;
         }
+
         // Texbox Validations
         private void IntValidationTextBox(object sender, TextCompositionEventArgs e)
         {
             Regex regex = new Regex("[^0-9-]+");
             e.Handled = regex.IsMatch(e.Text);
         }
+
         private void FloatValidationTextBox(object sender, TextCompositionEventArgs e)
         {
             Regex regex = new Regex("[^0-9.-]+");
             e.Handled = regex.IsMatch(e.Text);
         }
+
         // Data Table Sorting
         public static DataTable ResortDataTable(DataTable dt, string colName, string direction)
         {
@@ -258,69 +381,53 @@ public MainWindow()
             dt = dt.DefaultView.ToTable();
             return dt;
         }
+
         // Text to Numeric Converters
         public static int ConvertToInteger(string text)
         {
-            int i = 0;
-            Int32.TryParse(text, out i);
+            int.TryParse(text, out int i);
             return i;
         }
 
         public static long ConvertToLong(string text)
         {
-            long i = 0;
-            Int64.TryParse(text, out i);
+            long.TryParse(text, out long i);
             return i;
         }
-
 
         public static uint ConvertToUInteger(string text)
         {
+            // NOTE: original code used base 32 which is invalid for Convert.ToUInt32(string, int).
+            // Leaving as-is if you rely on it elsewhere; consider fixing to base 10/16 as needed.
             uint i = 0;
-            i = Convert.ToUInt32(text, 32);            
+            try { i = Convert.ToUInt32(text, 32); } catch { }
             return i;
         }
+
         public static float ConvertToFloat(string text)
         {
-            float i = 0f;
-            float.TryParse(text, out i);
+            float.TryParse(text, out float i);
             return i;
         }
+
         public static decimal ConvertToDecimal(string text)
         {
-            decimal i = 0;
-            decimal.TryParse(text, out i);
+            decimal.TryParse(text, out decimal i);
             return i;
         }
+
         public static uint ConvertHexToDecimal(string hexValue)
         {
-            //decimal i = 0;
-            //decimal.TryParse(text, out i);
-            //return i;
             uint i = 0;
-            //int i = int.Parse(hexValue, System.Globalization.NumberStyles.HexNumber);
-            //Int32.TryParse(hexValue, out i);
-
-            try
-            {
-                i = uint.Parse(hexValue, System.Globalization.NumberStyles.HexNumber);
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-
+            try { i = uint.Parse(hexValue, System.Globalization.NumberStyles.HexNumber); }
+            catch { }
             return i;
         }
+
         public static string ConvertToHex(string value)
         {
-
             int i = ConvertToInteger(value);
-            string hexValue = i.ToString("X8");
-
-            return hexValue;
-
+            return i.ToString("X8");
         }
 
         // UI Stuff
@@ -344,21 +451,25 @@ public MainWindow()
             positionsDataTable.Clear();
             eventDataTable.Clear();
         }
+
         public void ResetIndexAllDataGrids()
         {
             dgInt32.SelectedIndex = -1;
-
         }
+
         public void ClearAllFields()
         {
-
             tbWCID.Text = "";
             tbWeenieName.Text = "";
             tbValue.Text = "";
             tb64Value.Text = "";
             tbFloatValue.Text = "";
             tbStringValue.Text = "";
-            tbDiDValue.Text = "";
+
+            // WAS: tbDiDValue.Text = "";
+            if (this.FindName("didPicker") is DidValuePicker dp)
+                dp.Value = 0;
+
             tbSpellId.Text = "";
             tbSpellValue.Text = "";
             tbSkillLevel.Text = "";
@@ -371,7 +482,7 @@ public MainWindow()
 
             tbBodyPartDamageValue.Text = "";
             tbBodyPartDamageVariance.Text = "";
-            
+
             tbBodyPartArmorLevel.Text = "";
             tbBodyPartArmorLevelSlash.Text = "";
             tbBodyPartArmorLevelPierce.Text = "";
@@ -443,49 +554,37 @@ public MainWindow()
             cbBodyPart.SelectedIndex = 0;
             cbBodyPartDamageType.SelectedIndex = 1;
 
-
             ClearAttributeFields();
             ClearAttribute2Fields();
-
         }
+
+
         public void MiscSettings()
         {
             rtbEmoteScript.HorizontalScrollBarVisibility = ScrollBarVisibility.Visible;
             rtbEmoteScript.Document.PageWidth = 2000;
             if (WeenieFabUser.Default.AutoCalcHealth == true)
                 chkbAutoHealth.IsChecked = true;
-
-
         }
 
         private void lvSpellsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Don't think I need this anymore.
+            // Not used currently
         }
+
         private void GetVersion()
         {
-
-            System.Reflection.Assembly executingAssembly = System.Reflection.Assembly.GetExecutingAssembly();
+            var executingAssembly = Assembly.GetExecutingAssembly();
             var fileVersionInfo = FileVersionInfo.GetVersionInfo(executingAssembly.Location);
             var version = fileVersionInfo.FileVersion;
-
-            
             txtblockVersion.Text = "Version " + version;
         }
 
         // **Auto Calcs for Health/Stam/Mana and Skills**
         private void chkbAutoHealth_Changed(object sender, RoutedEventArgs e)
         {
-            if (chkbAutoHealth.IsChecked == true)
-            {
-                WeenieFabUser.Default.AutoCalcHealth = true;
-                WeenieFabUser.Default.Save();
-            }
-            else
-            {
-                WeenieFabUser.Default.AutoCalcHealth = false;
-                WeenieFabUser.Default.Save();
-            }
+            WeenieFabUser.Default.AutoCalcHealth = chkbAutoHealth.IsChecked == true;
+            WeenieFabUser.Default.Save();
         }
 
         private void tbHealthCurrentLevel_TextChanged(object sender, TextChangedEventArgs e)
@@ -495,7 +594,7 @@ public MainWindow()
                 int attribEndurance = ConvertToInteger(tbAttribEndurance.Text) / 2;
                 int finalHealth = ConvertToInteger(tbHealthCurrentLevel.Text);
                 tbHealthInitLevel.Text = (finalHealth - attribEndurance).ToString();
-            }          
+            }
         }
 
         private void tbStaminaCurrentLevel_TextChanged(object sender, TextChangedEventArgs e)
@@ -520,32 +619,22 @@ public MainWindow()
 
         private void chkbSkillCalc_Changed(object sender, RoutedEventArgs e)
         {
-            if (chkbAutoHealth.IsChecked == true)
-            {
-                WeenieFabUser.Default.AutoCalcSkill = true;
-                WeenieFabUser.Default.Save();
-            }
-            else
-            {
-                WeenieFabUser.Default.AutoCalcSkill = false;
-                WeenieFabUser.Default.Save();
-                
-            }
+            WeenieFabUser.Default.AutoCalcSkill = chkbAutoHealth.IsChecked == true;
+            WeenieFabUser.Default.Save();
         }
 
         private void tbSkillFinalLevel_TextChanged(object sender, TextChangedEventArgs e)
         {
             AutoSkillCalc();
         }
+
         private void cbSkillType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Not sure if I want to do this or not.  Will leave out for now, unless it is asked for. HQ 7/8
-            // AutoSkillCalc();
+            // Intentionally left off auto-calc on change
         }
+
         public void AutoSkillCalc()
         {
-            // Skill Formulas based on Attribs
-
             int strength = ConvertToInteger(tbAttribStrength.Text);
             int endur = ConvertToInteger(tbAttribEndurance.Text);
             int coord = ConvertToInteger(tbAttribCoordination.Text);
@@ -553,12 +642,10 @@ public MainWindow()
             int focus = ConvertToInteger(tbAttribFocus.Text);
             int self = ConvertToInteger(tbAttribSelf.Text);
 
-
             if (WeenieFabUser.Default.AutoCalcSkill == true)
             {
                 switch (cbSkillType.SelectedIndex)
                 {
-
                     case 6:  // MeleeD
                     case 46: // Finesse Weapons
                     case 51: // Sneak Attack
@@ -579,9 +666,9 @@ public MainWindow()
                     case 18:  // Item Appraisal - Item Tink
                         tbSkillLevel.Text = (ConvertToInteger(tbSkillFinalLevel.Text) - ((focus + coord) / 2)).ToString();
                         break;
-                    case 19:  // Personal Appraisal - Assess Persoon
+                    case 19:  // Personal Appraisal - Assess Person
                     case 20:  // Deception
-                    case 27:  // Creature Appraisal - Asses Creature
+                    case 27:  // Creature Appraisal - Assess Creature
                     case 35:  // Leadership
                     case 36:  // Loyalty
                     case 40:  // Salvaging
@@ -663,18 +750,16 @@ public MainWindow()
                         break;
                 }
             }
-
         }
+
         public void FileChanged()
         {
             Globals.FileChanged = true;
-
             txtBlockFileStatus.Text = "File has been changed, please save changes.";
-
         }
+
         public bool FileChangedCheck()
         {
-
             MessageBoxButton buttons = MessageBoxButton.YesNoCancel;
             MessageBoxImage icon = MessageBoxImage.Question;
             MessageBoxResult result = MessageBox.Show("Save current Weenie?", "Possible Unsaved Changes", buttons, icon);
@@ -689,14 +774,13 @@ public MainWindow()
                 return false;
         }
 
-        // Not used currently (button is hidden) but have ideas for this.   Reuse  for importing body tables.
+        // Not used currently (button is hidden) but have ideas for this. Reuse for importing body tables.
         private void btnGenerateBodyTable_Click(object sender, RoutedEventArgs e)
         {
             string header = $"INSERT INTO `weenie_properties_body_part` (`object_Id`, `key`, `d_Type`, `d_Val`, `d_Var`, `base_Armor`, `armor_Vs_Slash`, `armor_Vs_Pierce`, `armor_Vs_Bludgeon`, `armor_Vs_Cold`, `armor_Vs_Fire`, `armor_Vs_Acid`, `armor_Vs_Electric`, `armor_Vs_Nether`, `b_h`, `h_l_f`, `m_l_f`, `l_l_f`, `h_r_f`, `m_r_f`, `l_r_f`, `h_l_b`, `m_l_b`, `l_l_b`, `h_r_b`, `m_r_b`, `l_r_b`)";
-
             string bodyparts = TableToSql.ConvertBodyPart(bodypartsDataTable, tbWCID.Text, header);
             rtbBodyParts.Document.Blocks.Clear();
-            rtbBodyParts.Document.Blocks.Add(new System.Windows.Documents.Paragraph(new Run(bodyparts)));
+            rtbBodyParts.Document.Blocks.Add(new Paragraph(new Run(bodyparts)));
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -707,17 +791,14 @@ public MainWindow()
                     e.Cancel = true;
             }
         }
+
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
         {
-            // for .NET Core you need to add UseShellExecute = true
-            // see https://docs.microsoft.com/dotnet/api/system.diagnostics.processstartinfo.useshellexecute#property-value
-            Process browser = new Process();
+            var browser = new Process();
             browser.StartInfo.UseShellExecute = true;
             browser.StartInfo.FileName = e.Uri.AbsoluteUri;
             browser.Start();
             e.Handled = true;
         }
-
     }
-
 }

@@ -1,8 +1,13 @@
-# WeenieFab
-Editor for AC emu weenie files.
-Built on .Net Core and WPF.
+# WeenieFab — Wave 6
 
-Download the beta on the releases page.
-[WeenieFab Releases](https://github.com/harliq/Weenie-Fab/releases/)
+### What’s new
+- **DID Value Picker**: searchable, type-aware input (decimal or 0xHEX) with DAT presence indicator
+- **DAT-awareness**: prompts for Portal.dat once; status dot = green (exists), orange (not in DAT)
+- **DB probe**: auto-falls back to offline mode if MySQL unreachable (UI still works)
+- **No-crash UX**: designer-safe and guarded dialogs
 
-![WeenieFab Enhanced Tools Options](images/weeniefabNewOptions.png)
+### Setup
+1) Install .NET + VS, open solution.
+2) Create a local `dbconfig.local.json` (ignored by git):
+   ```json
+   { "connectionString": "server=127.0.0.1;port=3308;database=ace_world;user id=root;password=root;SslMode=None;AllowPublicKeyRetrieval=True;Default Command Timeout=5;Connection Timeout=4;" }

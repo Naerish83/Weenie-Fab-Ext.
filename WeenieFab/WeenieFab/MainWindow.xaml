@@ -1789,18 +1789,48 @@
                 </TabItem>
                 <TabItem Header="Data ID">
                     <Grid Background="#FFE1E8F5">
-                        <Label Content="Value" HorizontalAlignment="Left" Margin="92,63,0,0" VerticalAlignment="Top"/>
                         <Label Content="Data ID" HorizontalAlignment="Left" Margin="92,5,0,0" VerticalAlignment="Top"/>
-                        <ComboBox x:Name="cbDiDProps" HorizontalAlignment="Left" Margin="92,36,0,0" VerticalAlignment="Top" ItemsSource="{Binding dInt}" Width="547" ToolTip="Select the Property You wish to Add/Change"/>
-                        <TextBox x:Name="tbDiDValue" PreviewTextInput="IntValidationTextBox" HorizontalAlignment="Left" Margin="92,85,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="200" ToolTip="DID value"/>
-                        <Button x:Name="btnAddDiD" Content="Add " HorizontalAlignment="Left" Margin="315,84,0,0" VerticalAlignment="Top" Width="100" Click="btnAddDiD_Click" ToolTip="Add property"/>
-                        <Button x:Name="btnUpdateDiD" Content="Update" HorizontalAlignment="Left" Margin="427,84,0,0" VerticalAlignment="Top" Click="btnUpdateDiD_Click" Width="100" RenderTransformOrigin="1.465,0.555" ToolTip="Update selected property" IsDefault="True"/>
-                        <Button x:Name="btnRemoveDiD" Content="Remove" HorizontalAlignment="Left" Margin="538,84,0,0" VerticalAlignment="Top" Width="100" Click="btnRemoveDiD_Click" ToolTip="Remove selected property"/>
-                        <DataGrid x:Name="dgDiD" ItemsSource="{Binding}" Margin="92,117,202,32" AutoGenerateColumns="False" DataGridCell.Selected="dgDiD_RowSelected" HorizontalGridLinesBrush="#FF767575" VerticalGridLinesBrush="#FF747474" Background="#FFFFE9E9" ToolTip="Select a property to edit/change" MinWidth="5" MinHeight="420" MaxHeight="600" CanUserSortColumns="False" CanUserReorderColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False">
+                        <ComboBox x:Name="cbDiDProps"
+              HorizontalAlignment="Left"
+              Margin="92,36,0,0"
+              VerticalAlignment="Top"
+              Width="547"
+              ToolTip="Select the Property You wish to Add/Change"/>
+
+                        <Label Content="Value" HorizontalAlignment="Left" Margin="92,63,0,0" VerticalAlignment="Top"/>
+                        <!-- Smart, filtered DID picker -->
+                        <local:DidValuePicker x:Name="didPicker"
+                          HorizontalAlignment="Left"
+                          Margin="92,85,0,0"
+                          VerticalAlignment="Top"
+                          MinWidth="320"
+                          ToolTip="Search by decimal or 0xHEX; filtered by DID type"
+                          DidType="{Binding ElementName=cbDiDProps, Path=SelectedIndex}"
+                          />
+
+                        <Button x:Name="btnAddDiD"    Content="Add"     HorizontalAlignment="Left" Margin="430,84,0,0" VerticalAlignment="Top" Width="100" Click="btnAddDiD_Click"    ToolTip="Add property"/>
+                        <Button x:Name="btnUpdateDiD" Content="Update"  HorizontalAlignment="Left" Margin="542,84,0,0" VerticalAlignment="Top" Width="100" Click="btnUpdateDiD_Click" ToolTip="Update selected property" IsDefault="True"/>
+                        <Button x:Name="btnRemoveDiD" Content="Remove"  HorizontalAlignment="Left" Margin="654,84,0,0" VerticalAlignment="Top" Width="100" Click="btnRemoveDiD_Click" ToolTip="Remove selected property"/>
+
+                        <DataGrid x:Name="dgDiD"
+              ItemsSource="{Binding}"
+              Margin="92,117,202,32"
+              AutoGenerateColumns="False"
+              DataGridCell.Selected="dgDiD_RowSelected"
+              HorizontalGridLinesBrush="#FF767575"
+              VerticalGridLinesBrush="#FF747474"
+              Background="#FFFFE9E9"
+              ToolTip="Select a property to edit/change"
+              MinWidth="5" MinHeight="420" MaxHeight="600"
+              CanUserSortColumns="False"
+              CanUserReorderColumns="False"
+              CanUserAddRows="False"
+              CanUserDeleteRows="False"
+              CanUserResizeRows="False">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Property" IsReadOnly="True" Binding="{Binding Property}" Width="1*"/>
-                                <DataGridTextColumn Header="Value" IsReadOnly="True"  Binding="{Binding Value}" Width="1*"/>
-                                <DataGridTextColumn Header="Description" IsReadOnly="True"  Binding="{Binding Description}" Width="8*"/>
+                                <DataGridTextColumn Header="Property"    IsReadOnly="True" Binding="{Binding Property}"    Width="1*"/>
+                                <DataGridTextColumn Header="Value"       IsReadOnly="True" Binding="{Binding Value}"       Width="1*"/>
+                                <DataGridTextColumn Header="Description" IsReadOnly="True" Binding="{Binding Description}" Width="8*"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </Grid>
