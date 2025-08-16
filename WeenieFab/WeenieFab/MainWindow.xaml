@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WeenieFab"
+        xmlns:controls="clr-namespace:WeenieFab.Controls"
         mc:Ignorable="d"
-        Title="Weenie Fab" Height="775" Width="1200" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" WindowStartupLocation="CenterScreen" Icon="/weeniefactoryicon.ico" Closing="Window_Closing">
+        Title="Weenie Fab" Height="775" Width="1400" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" WindowStartupLocation="CenterScreen" Icon="/weeniefactoryicon.ico" Closing="Window_Closing">
 
 
     <Window.Resources>
@@ -1696,15 +1697,20 @@
                     </Style>
                 </TabControl.Resources>
                 <TabItem x:Name="tiInt32" Header="Integer32">
-                    <Grid Background="#FFE1E8F5">
+                    <Grid Background="#FFE1E8F5" Margin="0,0,1,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="99*"/>
+                            <ColumnDefinition Width="4*"/>
+                            <ColumnDefinition Width="246*"/>
+                        </Grid.ColumnDefinitions>
                         <Label Content="Value" HorizontalAlignment="Left" Margin="92,83,0,0" VerticalAlignment="Top"/>
                         <Label Content="Integer 32" HorizontalAlignment="Left" Margin="92,5,0,0" VerticalAlignment="Top"/>
-                        <ComboBox x:Name="cbInt32Props" HorizontalAlignment="Left" Margin="92,36,0,0" VerticalAlignment="Top" ItemsSource="{Binding Path=dInt}" Width="547" ToolTip="Select the Property You wish to Add/Change"/>
+                        <ComboBox x:Name="cbInt32Props" HorizontalAlignment="Left" Margin="92,36,0,0" VerticalAlignment="Top" ItemsSource="{Binding Path=dInt}" Width="547" ToolTip="Select the Property You wish to Add/Change" Grid.ColumnSpan="3"/>
                         <TextBox x:Name="tbValue" PreviewTextInput="IntValidationTextBox" HorizontalAlignment="Left" Margin="92,85,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="200" ToolTip="Property value"/>
-                        <Button x:Name="btnAddInt32" Content="Add " HorizontalAlignment="Left" Margin="315,84,0,0" VerticalAlignment="Top" Width="100" Click="btnAddInt32_Click" ToolTip="Add property"/>
-                        <Button x:Name="btnUpdateInt32" Content="Update" HorizontalAlignment="Left" Margin="425,84,0,0" VerticalAlignment="Top" Click="btnUpdateInt32_Click" Width="100" RenderTransformOrigin="1.465,0.555" ToolTip="Update selected property" IsDefault="True"/>
-                        <Button x:Name="btnInt32Remove" Content="Remove" HorizontalAlignment="Left" Margin="535,84,0,0" VerticalAlignment="Top" Click="btnInt32Remove_Click" Width="100" ToolTip="Remove selected property"/>
-                        <DataGrid x:Name="dgInt32" ItemsSource="{Binding}" Margin="92,125,202,30" AutoGenerateColumns="False" HorizontalGridLinesBrush="#FF767575" VerticalGridLinesBrush="#FF747474" Background="#FFFFE9E9" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserSortColumns="False" DataGridCell.Selected="dgInt32_RowSelected" MinWidth="5" ToolTip="Select a property to edit/change" MinHeight="400" MaxHeight="600" CanUserResizeRows="False">
+                        <Button x:Name="btnAddInt32" Content="Add " HorizontalAlignment="Left" Margin="315,84,0,0" VerticalAlignment="Top" Width="100" Click="btnAddInt32_Click" ToolTip="Add property" Grid.ColumnSpan="3"/>
+                        <Button x:Name="btnUpdateInt32" Content="Update" HorizontalAlignment="Left" Margin="13,84,0,0" VerticalAlignment="Top" Click="btnUpdateInt32_Click" Width="100" RenderTransformOrigin="1.465,0.555" ToolTip="Update selected property" IsDefault="True" Grid.Column="2"/>
+                        <Button x:Name="btnInt32Remove" Content="Remove" HorizontalAlignment="Left" Margin="123,84,0,0" VerticalAlignment="Top" Click="btnInt32Remove_Click" Width="100" ToolTip="Remove selected property" Grid.Column="2"/>
+                        <DataGrid x:Name="dgInt32" ItemsSource="{Binding}" Margin="92,125,202,30" AutoGenerateColumns="False" HorizontalGridLinesBrush="#FF767575" VerticalGridLinesBrush="#FF747474" Background="#FFFFE9E9" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserSortColumns="False" DataGridCell.Selected="dgInt32_RowSelected" MinWidth="5" ToolTip="Select a property to edit/change" MinHeight="400" MaxHeight="600" CanUserResizeRows="False" Grid.ColumnSpan="3">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Property" IsReadOnly="True" Binding="{Binding Path=Property}" Width="1*"></DataGridTextColumn>
                                 <DataGridTextColumn Header="Value" IsReadOnly="True"  Binding="{Binding Path=Value}" Width="1*"></DataGridTextColumn>
@@ -1770,7 +1776,7 @@
                     </Grid>
                 </TabItem>
                 <TabItem Header="String">
-                    <Grid Background="#FFE1E8F5">
+                    <Grid Background="#FFE1E8F5" Margin="0,0,205,0">
                         <Label Content="String" HorizontalAlignment="Left" Margin="92,63,0,0" VerticalAlignment="Top"/>
                         <Label Content="String Property" HorizontalAlignment="Left" Margin="92,5,0,0" VerticalAlignment="Top"/>
                         <ComboBox x:Name="cbStringProps" HorizontalAlignment="Left" Margin="92,36,0,0" VerticalAlignment="Top" ItemsSource="{Binding dInt}" Width="398" ToolTip="Select the Property You wish to Add/Change"/>
@@ -1789,6 +1795,13 @@
                 </TabItem>
                 <TabItem Header="Data ID">
                     <Grid Background="#FFE1E8F5">
+                        <!-- two columns: left = your existing UI, right = preview panel -->
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="360" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- LEFT: your existing controls -->
                         <Label Content="Data ID" HorizontalAlignment="Left" Margin="92,5,0,0" VerticalAlignment="Top"/>
                         <ComboBox x:Name="cbDiDProps"
               HorizontalAlignment="Left"
@@ -1798,15 +1811,13 @@
               ToolTip="Select the Property You wish to Add/Change"/>
 
                         <Label Content="Value" HorizontalAlignment="Left" Margin="92,63,0,0" VerticalAlignment="Top"/>
-                        <!-- Smart, filtered DID picker -->
                         <local:DidValuePicker x:Name="didPicker"
                           HorizontalAlignment="Left"
                           Margin="92,85,0,0"
                           VerticalAlignment="Top"
                           MinWidth="320"
                           ToolTip="Search by decimal or 0xHEX; filtered by DID type"
-                          DidType="{Binding ElementName=cbDiDProps, Path=SelectedIndex}"
-                          />
+                          DidType="{Binding ElementName=cbDiDProps, Path=SelectedIndex}"/>
 
                         <Button x:Name="btnAddDiD"    Content="Add"     HorizontalAlignment="Left" Margin="430,84,0,0" VerticalAlignment="Top" Width="100" Click="btnAddDiD_Click"    ToolTip="Add property"/>
                         <Button x:Name="btnUpdateDiD" Content="Update"  HorizontalAlignment="Left" Margin="542,84,0,0" VerticalAlignment="Top" Width="100" Click="btnUpdateDiD_Click" ToolTip="Update selected property" IsDefault="True"/>
@@ -1814,7 +1825,8 @@
 
                         <DataGrid x:Name="dgDiD"
               ItemsSource="{Binding}"
-              Margin="92,117,202,32"
+              Margin="92,117,196,32"
+              Grid.Column="0"
               AutoGenerateColumns="False"
               DataGridCell.Selected="dgDiD_RowSelected"
               HorizontalGridLinesBrush="#FF767575"
@@ -1833,6 +1845,9 @@
                                 <DataGridTextColumn Header="Description" IsReadOnly="True" Binding="{Binding Description}" Width="8*"/>
                             </DataGrid.Columns>
                         </DataGrid>
+
+                        <!-- RIGHT: preview panel -->
+                        <controls:PreviewPanel Margin="890,12,71,4" Grid.ColumnSpan="2"/>
                     </Grid>
                 </TabItem>
                 <TabItem Header="Attribs/Skills">
@@ -2282,9 +2297,9 @@
                         </DataGrid>
                     </Grid>
                 </TabItem>
-				<TabItem Header="Enhanced Tools">
-					<local:EnhancedTools x:Name="enhancedToolsTab"/>
-				</TabItem>
+                <TabItem Header="Enhanced Tools">
+                    <local:EnhancedTools x:Name="enhancedToolsTab"/>
+                </TabItem>
             </TabControl>
             <StatusBar x:Name="WFStatusBar" VerticalAlignment="Bottom" MinWidth="1200" MinHeight="25">
                 <StatusBar.ItemsPanel>

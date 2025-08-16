@@ -18,6 +18,8 @@ using System.Windows.Navigation;
 using WeenieFab.Properties;
 using Path = System.IO.Path;
 
+using WeenieFab.Lookups;
+
 namespace WeenieFab
 {
     /// <summary>
@@ -302,11 +304,39 @@ namespace WeenieFab
             cbBodyPart.ItemsSource = BodyParts;
             cbBodyPart.SelectedIndex = 0;
 
-            List<string> DamageTypes = new List<string>();
-            foreach (string line in File.ReadLines(@"TypeLists\DamageTypes.txt"))
-                DamageTypes.Add(line);
-            cbBodyPartDamageType.ItemsSource = DamageTypes;
-            cbBodyPartDamageType.SelectedIndex = 1;
+            try
+{
+    LookupRegistry.Initialize();
+    var dmg = LookupRegistry.Get("DAMAGE_TYPE_INT")
+                .Select(x => new { x.Id, x.Label })
+                .ToList();
+
+    if (dmg.Count == 0) throw new Exception("Empty DAMAGE_TYPE_INT table");
+
+    cbBodyPartDamageType.ItemsSource = dmg;
+    cbBodyPartDamageType.DisplayMemberPath = "Label";
+    cbBodyPartDamageType.SelectedValuePath = "Id";
+    cbBodyPartDamageType.SelectedValue = 1; // default to Slash
+}
+catch
+{
+    var dmgFallback = new[]
+    {
+        new { Id = 0,   Label = "None/Undefined" },
+        new { Id = 1,   Label = "Slash" },
+        new { Id = 2,   Label = "Pierce" },
+        new { Id = 4,   Label = "Bludgeon" },
+        new { Id = 8,   Label = "Cold" },
+        new { Id = 16,  Label = "Fire" },
+        new { Id = 32,  Label = "Acid" },
+        new { Id = 64,  Label = "Electric" },
+        new { Id = 128, Label = "Nether" }
+    };
+    cbBodyPartDamageType.ItemsSource = dmgFallback;
+    cbBodyPartDamageType.DisplayMemberPath = "Label";
+    cbBodyPartDamageType.SelectedValuePath = "Id";
+    cbBodyPartDamageType.SelectedValue = 1;
+}
 
             List<string> InstanceTypes = new List<string>();
             foreach (string line in File.ReadLines(@"TypeLists\InstanceIDTypes.txt"))
