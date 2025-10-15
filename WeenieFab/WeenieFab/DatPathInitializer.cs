@@ -10,22 +10,23 @@ namespace WeenieFab
     public static class DatPathInitializer
     {
         private static bool _initialized;
-        private static Type? _datManagerType; // Marked as nullable
+        private static Type? _datManagerType;
 
-        // Returns true if ACE.DatLoader is available and initialized
         public static bool EnsureDatReady(Window? owner)
         {
-            if (_initialized) return _datManagerType != null;
-
-            // Try to find ACE.DatLoader.DatManager by reflection (optional)
-            _datManagerType = Type.GetType("ACE.DatLoader.DatManager, ACE.DatLoader", throwOnError: false);
-            if (_datManagerType == null)
+            if (_initialized)
             {
-                _initialized = true; // run without DAT
+                return _datManagerType is not null;
+            }
+
+            _datManagerType = Type.GetType("ACE.DatLoader.DatManager, ACE.DatLoader", throwOnError: false);
+            if (_datManagerType is null)
+            {
+                _initialized = true;
                 return false;
             }
 
-            var ofd = new OpenFileDialog
+            var openFileDialog = new OpenFileDialog
             {
                 Title = "Select Portal.dat",
                 Filter = "Portal.dat|Portal.dat|All files|*.*",
@@ -33,30 +34,29 @@ namespace WeenieFab
                 Multiselect = false
             };
 
-            bool? res;
-            // If we have an owner, use that overload; otherwise use parameterless to avoid null crash
-            if (owner != null) res = ofd.ShowDialog(owner);
-            else res = ofd.ShowDialog();
-
-            if (res != true)
+            var dialogResult = owner is not null ? openFileDialog.ShowDialog(owner) : openFileDialog.ShowDialog();
+            if (dialogResult is not true)
             {
-                _initialized = true;   // allow continuing without DAT selection
+                _initialized = true;
                 return false;
             }
 
-            var portalPath = ofd.FileName;
-            var cellPath = Path.Combine(Path.GetDirectoryName(portalPath) ?? "", "Cell.dat");
-            if (!File.Exists(cellPath)) cellPath = null;
+            var portalPath = openFileDialog.FileName;
+            var portalDirectory = Path.GetDirectoryName(portalPath);
+            string? cellPath = portalDirectory is null ? null : Path.Combine(portalDirectory, "Cell.dat");
+            if (cellPath is not null && !File.Exists(cellPath))
+            {
+                cellPath = null;
+            }
 
-            // Call DatManager.Initialize(portalPath, cellPath) via reflection
-            var mi = _datManagerType.GetMethod("Initialize", BindingFlags.Public | BindingFlags.Static);
-            mi?.Invoke(null, new object?[] { portalPath, cellPath });
+            var initializeMethod = _datManagerType.GetMethod("Initialize", BindingFlags.Public | BindingFlags.Static);
+            initializeMethod?.Invoke(null, new object?[] { portalPath, cellPath });
 
             _initialized = true;
             return true;
         }
 
         public static bool DatAvailable =>
-            Type.GetType("ACE.DatLoader.DatManager, ACE.DatLoader", throwOnError: false) != null;
+            Type.GetType("ACE.DatLoader.DatManager, ACE.DatLoader", throwOnError: false) is not null;
     }
 }
