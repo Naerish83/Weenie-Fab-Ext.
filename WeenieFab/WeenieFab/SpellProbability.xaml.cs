@@ -88,7 +88,7 @@ namespace WeenieFab
         private void ButtonGenerateProbSpellBookTable_Click(object sender, RoutedEventArgs e)
         {
             float testChance = CalculateTotalPercentChance(SpellBookPercent, false);
-            if(testChance > 100)
+            if (testChance > 100)
             {
                 MessageBox.Show("Warning! Total Percent is over 100%! Please fix first!");
                 return;
@@ -167,7 +167,7 @@ namespace WeenieFab
             foreach (DataRow row in dataTable.Rows)
             {
                 tempProb = MainWindow.ConvertToFloat(row[1].ToString());
-                if(subtractTwo)
+                if (subtractTwo)
                     spellProb.Add(MainWindow.ConvertToFloat(row[1].ToString()) - 2);
                 else
                     spellProb.Add(MainWindow.ConvertToFloat(row[1].ToString()));
@@ -195,18 +195,18 @@ namespace WeenieFab
         {
             var chances = new List<float>();
 
-            foreach(var spellpercentchance in percentChances)
-            {              
+            foreach (var spellpercentchance in percentChances)
+            {
                 chances.Add(spellpercentchance / 100);
             }
             var spellbook = new List<float>();
             for (var i = 0; i < chances.Count; i++)
             {
-                var prevChanceNone = i > 0 ? GetProbabilityNone(spellbook) : 1.0f;               
-                spellbook.Add(chances[i] / prevChanceNone);                
+                var prevChanceNone = i > 0 ? GetProbabilityNone(spellbook) : 1.0f;
+                spellbook.Add(chances[i] / prevChanceNone);
             }
             var spellbookFinal = new List<float>();
-            foreach(var tempProb in spellbook)
+            foreach (var tempProb in spellbook)
             {
                 spellbookFinal.Add((float)Math.Round(tempProb + 2, 2));
             }
