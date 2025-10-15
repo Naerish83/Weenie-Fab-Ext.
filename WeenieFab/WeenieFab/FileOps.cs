@@ -1,90 +1,85 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Windows.Media.TextFormatting;
-using System.Text.RegularExpressions;
-using System.Windows.Documents;
-using Microsoft.Win32;
-using System.ComponentModel;
-using WeenieFab.Properties;
-using EmoteScriptLib;
-using System.Windows;
-using System.Reflection;
 using System.Data;
-using System.Threading;
-using System.Windows.Media.Animation;
-using System.Windows.Controls;
+using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Media.Animation;
+using EmoteScriptLib;
+using Microsoft.Win32;
+using WeenieFab.Properties;
 
 namespace WeenieFab
 {
     public partial class MainWindow
     {
-        public void OpenFile() 
+        public void OpenFile()
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Title = "Open Weenie File";
-            ofd.Filter = "All Weenie Types|*.sql;*.json|SQL files|*.sql|JSON files|*.json";            
-            ofd.RestoreDirectory = true;
+            var openFileDialog = new OpenFileDialog
+            {
+                Title = "Open Weenie File",
+                Filter = "All Weenie Types|*.sql;*.json|SQL files|*.sql|JSON files|*.json",
+                RestoreDirectory = true
+            };
 
             if (!WeenieFabUser.Default.UseFilePaths)
             {
-                ofd.InitialDirectory = WeenieFabUser.Default.DefaultSqlPath;
+                openFileDialog.InitialDirectory = WeenieFabUser.Default.DefaultSqlPath;
             }
 
-            Nullable<bool> result = ofd.ShowDialog();
-
-            if (result == true)
+            var dialogResult = openFileDialog.ShowDialog();
+            if (dialogResult is not true)
             {
-                string ext = Path.GetExtension(ofd.FileName);
+                return;
+            }
 
-                //  Opening a JSON file is going to depend on if ACData is fixed for strings. 
-                //  I have tried to work around what ACData does by attempting to do a temp file (didn't work issue with the way it handles strings),
-                //  AND at this point, ACData also changes the file name from the default JSON name.  This causes an issue.  So disabling it for now.  
-                //  Will revisit down the road.
+            var extension = Path.GetExtension(openFileDialog.FileName);
 
-                if (ext == ".json")
-                {
+            // Opening a JSON file is going to depend on if ACData is fixed for strings.
+            // I have tried to work around what ACData does by attempting to do a temp file (didn't work issue with the way it handles strings),
+            // AND at this point, ACData also changes the file name from the default JSON name. This causes an issue. So disabling it for now.
+            // Will revisit down the road.
 
-                    FileInfo jfileinfo = new FileInfo(ofd.FileName);
-                    DirectoryInfo directoryInfo = new DirectoryInfo(WeenieFabUser.Default.DefaultSqlPath);
-                    MessageBox.Show("Json import not supported yet.  Please use converter.");
+            if (extension == ".json")
+            {
+                MessageBox.Show("Json import not supported yet.  Please use converter.");
 
+                // *--- Area to uncomment for when it works --- *
+                ////ClearAllDataTables();
 
-                    // *--- Area to uncomment for when it works --- *
-                    ////ClearAllDataTables();
+                ////ClearAllFields();
+                ////ResetIndexAllDataGrids();
 
-                    ////ClearAllFields();
-                    ////ResetIndexAllDataGrids();
+                ////ACDataLib.Converter.json2sql(jfileinfo, null, directoryInfo);
 
-                    ////ACDataLib.Converter.json2sql(jfileinfo, null, directoryInfo);
+                //string sqlfilename = ofd.SafeFileName.Replace(".json", ".sql");
 
-                    //string sqlfilename = ofd.SafeFileName.Replace(".json", ".sql");
+                ////  Have to do all of this because ACData adds a zero infront of wcid (I am guessing it's padding zeros up to 5 places)
+                //string[] tsqlfilename = sqlfilename.Split(" ");
+                //string fmt = "00000.##";
+                //string twcid = ConvertToInteger(tsqlfilename[0]).ToString(fmt);
+                //sqlfilename = sqlfilename.Replace(tsqlfilename[0], twcid);
 
-                    ////  Have to do all of this because ACData adds a zero infront of wcid (I am guessing it's padding zeros upto 5 places)
-                    //string[] tsqlfilename = sqlfilename.Split(" ");
-                    //string fmt = "00000.##";
-                    //string twcid = ConvertToInteger(tsqlfilename[0]).ToString(fmt);
-                    //sqlfilename = sqlfilename.Replace(tsqlfilename[0], twcid);
+                ////ReadSQLFile(WeenieFabUser.Default.DefaultSqlPath + @"\" + sqlfilename);
 
-                    ////ReadSQLFile(WeenieFabUser.Default.DefaultSqlPath + @"\" + sqlfilename);
-
-                }
-                else if (ext == ".sql")
-                {
-                    ClearAllDataTables();
-                    //ClearAllDataGrids();
-                    ClearAllFields();
-                    //ResetIndexAllDataGrids();
-                    ReadSQLFile(ofd.FileName);
-                    Globals.WeenieFileName = ofd.FileName;
-                    this.Title = "WeenieFab - " + ofd.FileName;
-                    //var dateTime = DateTime.Now;
-                    txtBlockFileStatus.Text = "File Not saved ";
-                }
-                else
-                    MessageBox.Show("File Extension Not Reconized");
+            }
+            else if (extension == ".sql")
+            {
+                ClearAllDataTables();
+                //ClearAllDataGrids();
+                ClearAllFields();
+                //ResetIndexAllDataGrids();
+                ReadSQLFile(openFileDialog.FileName);
+                Globals.WeenieFileName = openFileDialog.FileName;
+                Title = "WeenieFab - " + openFileDialog.FileName;
+                //var dateTime = DateTime.Now;
+                txtBlockFileStatus.Text = "File Not saved ";
+            }
+            else
+            {
+                MessageBox.Show("File Extension Not Reconized");
             }
         }
 
@@ -94,7 +89,7 @@ namespace WeenieFab
             ClearAllFields();
             ReadSQLFile(filename);
             Globals.WeenieFileName = filename;
-            this.Title = "WeenieFab - " + filename;
+            Title = "WeenieFab - " + filename;
             //var dateTime = DateTime.Now;
             txtBlockFileStatus.Text = "File Not saved ";
 
@@ -117,46 +112,48 @@ namespace WeenieFab
             //{
             //    WriteSQLFile(sfd.FileName);
             //    Globals.WeenieFileName = sfd.FileName;
-            //    this.Title = "WeenieFab - " + sfd.FileName;
+            //    Title = "WeenieFab - " + sfd.FileName;
             //}
 
-            if (Globals.WeenieFileName == "" || Globals.WeenieFileName == null)
-                SaveFileAs();
-            else
+
+            if (string.IsNullOrEmpty(Globals.WeenieFileName))
             {
-                WriteSQLFile(Globals.WeenieFileName);
-                var dateTime = DateTime.Now;
-                txtBlockFileStatus.Text = "File Saved @ " + dateTime.ToString("hh:mm tt MM/dd/yyyy");
+                SaveFileAs();
+                return;
             }
-            
+
+            WriteSQLFile(Globals.WeenieFileName);
+            var dateTime = DateTime.Now;
+            txtBlockFileStatus.Text = "File Saved @ " + dateTime.ToString("hh:mm tt MM/dd/yyyy");
+
         }
 
         public void SaveFileAs()
         {
-            string weenieName = GetSavedFileName(stringDataTable);
-            string weenieWCID = tbWCID.Text.PadLeft(5, '0');
+            var weenieName = GetSavedFileName(stringDataTable);
+            var weenieWCID = tbWCID.Text.PadLeft(5, '0');
 
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Title = "Save Weenie File";
-            sfd.Filter = "SQL files|*.sql";
-            sfd.FileName = $"{weenieWCID} {weenieName}.sql";
-            sfd.RestoreDirectory = true;
+            var saveFileDialog = new SaveFileDialog
+            {
+                Title = "Save Weenie File",
+                Filter = "SQL files|*.sql",
+                FileName = $"{weenieWCID} {weenieName}.sql",
+                RestoreDirectory = true
+            };
 
             if (!WeenieFabUser.Default.UseFilePaths)
             {
-                sfd.InitialDirectory = WeenieFabUser.Default.DefaultSqlPath;
+                saveFileDialog.InitialDirectory = WeenieFabUser.Default.DefaultSqlPath;
             }
 
-            
+            var dialogResult = saveFileDialog.ShowDialog();
 
-            Nullable<bool> result = sfd.ShowDialog();
-
-            if (result == true)
+            if (dialogResult is true)
             {
                 ProgressBarAnimation();
-                WriteSQLFile(sfd.FileName);
-                Globals.WeenieFileName = sfd.FileName;
-                this.Title = "WeenieFab - " + sfd.FileName;
+                WriteSQLFile(saveFileDialog.FileName);
+                Globals.WeenieFileName = saveFileDialog.FileName;
+                Title = "WeenieFab - " + saveFileDialog.FileName;
                 var dateTime = DateTime.Now;
                 txtBlockFileStatus.Text = "File Saved @ " + dateTime.ToString("hh:mm tt MM/dd/yyyy");
             }
@@ -428,13 +425,13 @@ namespace WeenieFab
                     rtbEmoteScript.Document.Blocks.Clear();
                     rtbEmoteScript.Document.Blocks.Add(new System.Windows.Documents.Paragraph(new Run(tempES)));
 
-                    if (WeenieFabUser.Default.AutoLoadESFiles == true)
+                    if (WeenieFabUser.Default.AutoLoadESFiles)
                     {
-                        string esfile = WeenieFabUser.Default.DefaultESPath + @"\" + tbWCID.Text + ".es";
-                        if (File.Exists(esfile) == true)
+                        var esFile = WeenieFabUser.Default.DefaultESPath + @"\" + tbWCID.Text + ".es";
+                        if (File.Exists(esFile))
                         {
-                            string esdata = File.ReadAllText(esfile);
-                            rtbEmoteScript.Document.Blocks.Add(new System.Windows.Documents.Paragraph(new Run(esdata)));
+                            var esData = File.ReadAllText(esFile);
+                            rtbEmoteScript.Document.Blocks.Add(new System.Windows.Documents.Paragraph(new Run(esData)));
                         }
                     }
 
@@ -663,49 +660,54 @@ namespace WeenieFab
 
         public static string OpenESFile()
         {
-            string esdata = "";
+            var esData = string.Empty;
 
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Title = "Open EmoteScript File";
-            ofd.Filter = "ES files|*.es";
-            ofd.RestoreDirectory = true;
+            var openFileDialog = new OpenFileDialog
+            {
+                Title = "Open EmoteScript File",
+                Filter = "ES files|*.es",
+                RestoreDirectory = true
+            };
 
             if (!WeenieFabUser.Default.UseFilePaths)
             {
-                ofd.InitialDirectory = WeenieFabUser.Default.DefaultESPath;
+                openFileDialog.InitialDirectory = WeenieFabUser.Default.DefaultESPath;
             }
-            
 
-            Nullable<bool> result = ofd.ShowDialog();
+            var dialogResult = openFileDialog.ShowDialog();
 
-            if (result == true)
+            if (dialogResult is true)
             {
-                esdata = File.ReadAllText(ofd.FileName);
+                esData = File.ReadAllText(openFileDialog.FileName);
             }
 
-            return esdata;
+            return esData;
         }
-        public void SaveESFile(string esdata)
+
+        public void SaveESFile(string esData)
         {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Title = "Save EmoteScript File";
-            sfd.Filter = "ES files|*.es";
-            sfd.FileName = tbWCID.Text + $".es";
-            sfd.RestoreDirectory = true;
+            var saveFileDialog = new SaveFileDialog
+            {
+                Title = "Save EmoteScript File",
+                Filter = "ES files|*.es",
+                FileName = tbWCID.Text + ".es",
+                RestoreDirectory = true
+            };
 
             if (!WeenieFabUser.Default.UseFilePaths)
             {
-                sfd.InitialDirectory = WeenieFabUser.Default.DefaultESPath;
+                saveFileDialog.InitialDirectory = WeenieFabUser.Default.DefaultESPath;
             }
 
-            Nullable<bool> result = sfd.ShowDialog();
+            var dialogResult = saveFileDialog.ShowDialog();
 
-            if (result == true)
+            if (dialogResult is true)
             {
-                File.WriteAllText(sfd.FileName, esdata);
+                File.WriteAllText(saveFileDialog.FileName, esData);
             }
 
         }
+
         public static string GetSavedFileName(DataTable dt)
         {
             string weenieFN = "";
