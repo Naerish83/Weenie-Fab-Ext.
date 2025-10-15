@@ -51,9 +51,9 @@ namespace WeenieFab
         }
         private void btnOpenSqlFile_Click(object sender, RoutedEventArgs e)
         {
-            if (Globals.FileChanged == true)
+            if (Globals.FileChanged)
             {
-                if(FileChangedCheck())
+                if (FileChangedCheck())
                     OpenFile();
             }
             else
@@ -1547,7 +1547,7 @@ namespace WeenieFab
             spellProbablityInfo = $"Independent probabilities (cannot go above 100% additive): {string.Join(", ", SpellProb.Select(i => PercentFormat(i)))}\n";
             foreach (var independentChance in SpellProb)
                 totalIndependentChance += independentChance;
-            if(totalIndependentChance > 1)
+            if (totalIndependentChance > 1)
                 spellProbablityInfo += $"\n*WARNING* Independent Additive Probability is over 100% \nTotal Independent Additive Probability is {PercentFormat(totalIndependentChance)}\n\n";
             else
                 spellProbablityInfo += $"\nTotal Independent Additive Probability is {PercentFormat(totalIndependentChance)}\n\n";

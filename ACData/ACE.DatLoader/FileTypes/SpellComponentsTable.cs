@@ -66,7 +66,7 @@ namespace ACE.DatLoader.FileTypes
             // We need to make sure our second spell word, if any, is capitalized
             // Some spell words have no "secondSpellWord", so we're basically making sure the third word is capitalized.
             string secondSpellWordSet = (secondSpellWord + thirdSpellWord.ToLower());
-            if(secondSpellWordSet != "")
+            if (secondSpellWordSet != "")
             {
                 string firstLetter = secondSpellWordSet.Substring(0, 1).ToUpper();
                 secondSpellWordSet = firstLetter + secondSpellWordSet.Substring(1);

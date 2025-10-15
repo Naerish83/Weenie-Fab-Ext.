@@ -387,7 +387,7 @@ namespace WeenieFab
             int self = ConvertToInteger(tbAttribSelf.Text);
 
 
-            if (WeenieFabUser.Default.AutoCalcSkill == true)
+            if (WeenieFabUser.Default.AutoCalcSkill)
             {
                 switch (cbSkillType.SelectedIndex)
                 {

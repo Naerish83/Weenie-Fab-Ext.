@@ -78,7 +78,7 @@ namespace ACE.DatLoader
                 LanguageDat = new LanguageDatDatabase(datFile, keepOpen);
                 count = LanguageDat.AllFiles.Count;
                 log.Info($"Successfully opened {datFile} file, containing {count} records, iteration {LanguageDat.Iteration}");
-                if(LanguageDat.Iteration != ITERATION_LANGUAGE)
+                if (LanguageDat.Iteration != ITERATION_LANGUAGE)
                     log.Warn($"{datFile} iteration does not match expected end-of-retail version of {ITERATION_LANGUAGE}.");
             }
             catch (FileNotFoundException ex)

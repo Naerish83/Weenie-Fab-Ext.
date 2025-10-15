@@ -593,7 +593,7 @@ catch
         {
             rtbEmoteScript.HorizontalScrollBarVisibility = ScrollBarVisibility.Visible;
             rtbEmoteScript.Document.PageWidth = 2000;
-            if (WeenieFabUser.Default.AutoCalcHealth == true)
+            if (WeenieFabUser.Default.AutoCalcHealth)
                 chkbAutoHealth.IsChecked = true;
         }
 
@@ -619,7 +619,7 @@ catch
 
         private void tbHealthCurrentLevel_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (WeenieFabUser.Default.AutoCalcHealth == true)
+            if (WeenieFabUser.Default.AutoCalcHealth)
             {
                 int attribEndurance = ConvertToInteger(tbAttribEndurance.Text) / 2;
                 int finalHealth = ConvertToInteger(tbHealthCurrentLevel.Text);
@@ -629,7 +629,7 @@ catch
 
         private void tbStaminaCurrentLevel_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (WeenieFabUser.Default.AutoCalcHealth == true)
+            if (WeenieFabUser.Default.AutoCalcHealth)
             {
                 int attribEndurance = ConvertToInteger(tbAttribEndurance.Text);
                 int finalStamina = ConvertToInteger(tbStaminaCurrentLevel.Text);
@@ -639,7 +639,7 @@ catch
 
         private void tbManaCurrentLevel_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (WeenieFabUser.Default.AutoCalcHealth == true)
+            if (WeenieFabUser.Default.AutoCalcHealth)
             {
                 int attribSelf = ConvertToInteger(tbAttribSelf.Text);
                 int finalMana = ConvertToInteger(tbManaCurrentLevel.Text);
@@ -672,7 +672,7 @@ catch
             int focus = ConvertToInteger(tbAttribFocus.Text);
             int self = ConvertToInteger(tbAttribSelf.Text);
 
-            if (WeenieFabUser.Default.AutoCalcSkill == true)
+            if (WeenieFabUser.Default.AutoCalcSkill)
             {
                 switch (cbSkillType.SelectedIndex)
                 {
@@ -815,7 +815,7 @@ catch
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (Globals.FileChanged == true)
+            if (Globals.FileChanged)
             {
                 if (!FileChangedCheck())
                     e.Cancel = true;

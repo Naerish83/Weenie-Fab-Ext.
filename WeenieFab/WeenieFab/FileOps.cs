@@ -28,7 +28,7 @@ namespace WeenieFab
             ofd.Filter = "All Weenie Types|*.sql;*.json|SQL files|*.sql|JSON files|*.json";            
             ofd.RestoreDirectory = true;
 
-            if (WeenieFabUser.Default.UseFilePaths == false)
+            if (!WeenieFabUser.Default.UseFilePaths)
             {
                 ofd.InitialDirectory = WeenieFabUser.Default.DefaultSqlPath;
             }
@@ -142,7 +142,7 @@ namespace WeenieFab
             sfd.FileName = $"{weenieWCID} {weenieName}.sql";
             sfd.RestoreDirectory = true;
 
-            if (WeenieFabUser.Default.UseFilePaths == false)
+            if (!WeenieFabUser.Default.UseFilePaths)
             {
                 sfd.InitialDirectory = WeenieFabUser.Default.DefaultSqlPath;
             }
@@ -670,7 +670,7 @@ namespace WeenieFab
             ofd.Filter = "ES files|*.es";
             ofd.RestoreDirectory = true;
 
-            if (WeenieFabUser.Default.UseFilePaths == false)
+            if (!WeenieFabUser.Default.UseFilePaths)
             {
                 ofd.InitialDirectory = WeenieFabUser.Default.DefaultESPath;
             }
@@ -693,7 +693,7 @@ namespace WeenieFab
             sfd.FileName = tbWCID.Text + $".es";
             sfd.RestoreDirectory = true;
 
-            if (WeenieFabUser.Default.UseFilePaths == false)
+            if (!WeenieFabUser.Default.UseFilePaths)
             {
                 sfd.InitialDirectory = WeenieFabUser.Default.DefaultESPath;
             }
